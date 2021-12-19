@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const twofactor = require('node-2fa');
 
 const app = express();
 const PORT = 3001;
@@ -24,7 +25,32 @@ app.post('/login', async (req, res) => {
     if(!matchingUser) return res.status(404).send('Cant find user');
     const passwordCheck = await bcrypt.compare(password, matchingUser.password);
     if(!passwordCheck) return res.status(400).send('password doesnt match');
-    return res.status(200).send('Logged in successfully');
+    if(!matchingUser.token){
+        return res.status(200).send('Logged in successfully');
+    } else {
+        return res.status(200).send('Verify');
+    }
+})
+
+app.post('/twofa', (req, res) => {
+    const { username } = req.body;
+    const userSecret = twofactor.generateSecret({ name: "2FA App", account: username })
+    // const userToken = twofactor.generateToken(userSecret.secret);
+    users.map(user => {
+        if(user.username === username) {
+            user.token = userSecret.secret;
+        }
+    })
+    res.send(userSecret.qr);
+})
+
+app.post('/verify', (req, res) => {
+    const { token, username } = req.body;
+    const matchingUser = users.find(user => user.username === username);
+    const verifyTwoFA = twofactor.verifyToken(matchingUser.token, token);
+    return verifyTwoFA ?
+        res.status(200).send('Logged in successfully') :
+        res.status(401).send('Invalid code');
 })
 
 app.listen(PORT, () => {

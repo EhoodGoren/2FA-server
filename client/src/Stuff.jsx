@@ -1,6 +1,15 @@
+import { useNavigate } from 'react-router-dom';
+
 function Stuff() {
+    const navigate = useNavigate()
+    const twoFA = () => {
+        navigate('/twoFA');
+    }
     return (
-        <h1>This is the app. Wow!</h1>
+        <div>
+            <h1>This is the app. Wow!</h1>
+            <button onClick={twoFA}>2FA</button>
+        </div>
     )
 }
 

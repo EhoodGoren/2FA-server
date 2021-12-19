@@ -3,15 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
 
-function Login() {
+function Login({ setUsername }) {
     const navigate = useNavigate()
     const login = async () => {
         try {
-            await axios.post('/login', {
+            const loginResponse = await axios.post('/login', {
                 username: usernameInput.current.value,
                 password: passwordInput.current.value
             });
-            navigate('/stuff');
+            setUsername(usernameInput.current.value);
+            if(loginResponse.data.includes('Verify')){
+                navigate('/verify');
+            } else {
+                navigate('/stuff');
+            }
         } catch (error) {
             console.log(error);
         }
